@@ -1,5 +1,6 @@
 void inicializa_balanca(int DOUT ,int PD_SDK , int scale_p)
 { HX711 scale;
+  Serial.println("Initializing the scale");
   Serial.println("balanca");
   delay(100);
   Serial.println("Initializing the scale");
