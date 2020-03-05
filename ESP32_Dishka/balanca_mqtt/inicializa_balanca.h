@@ -5,8 +5,8 @@ void inicializa_balanca(int DOUT ,int PD_SDK , int scale_p)
   delay(100);
   Serial.println("Initializing the scale");
   // parameter "gain" is ommited; the default value 128 is used by the library
-  // HX711.DOUT  - pin #A1
-  // HX711.PD_SCK - pin #A0
+  // HX711.DOUT  - pin #25
+  // HX711.PD_SCK - pin #26
   scale.begin(DOUT, PD_SDK);
   scale.tare(); // reset the scale to 0
   scale.set_scale(scale_p);    // this value is obtained by calibrating the scale with known weights; see the README for details
