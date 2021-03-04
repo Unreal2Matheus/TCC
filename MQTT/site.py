@@ -23,22 +23,19 @@ password = "QqNg-ir0-N_M"  # Connection password
 # The callback for when the client connects to the broker
 def on_connect(client, userdata, flags, rc):
     # Print result of connection attempt
-    print("Connected with result code {0}".format(str(rc)))
+    print("Connected with result code "+str(rc))
     client.subscribe("spot/Balanca/#")
 
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     cursor.execute("select * from sensordata")
-    
-
     now = datetime.now()
     formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
-
     payload = json.loads(msg.payload.decode('utf-8'))
-   
     peso = float(payload["peso"])
     cerveja = payload["cerveja"]
+    
     print("Peso: "+str(peso))
     print("Tipo da cerveja: "+str(cerveja))
     print("DateTime: "+str(formatted_date))
@@ -53,8 +50,8 @@ def on_message(client, userdata, msg):
 
 
 client = mqtt.Client("servidor_mqtt")
-client.username_pw_set(user, password=password)
+client.username_pw_set(username=user, password=password)
 client.on_connect = on_connect  # Define callback function for successful connection
 client.on_message = on_message  # Define callback function for receipt of a message
-client.connect(broker_address, port=port)  # connect to broker
+client.connect(host=broker_address, port=port)  # connect to broker
 client.loop_forever()  # Start networking daemon

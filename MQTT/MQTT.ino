@@ -16,6 +16,9 @@ bool debug = true; //Display log message if True
 char data[80];
 float peso = 0;
 String cerveja = "APA";
+/* definitions for deepsleep */
+#define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP 30      /* Time ESP32 will go to sleep for 5 minutes (in seconds) */
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -44,6 +47,13 @@ void attemptConnectMQTT(){
     Serial.println(isWiFiConnected());
   }
 }
+void Slepping(){
+
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR); //go to sleep
+  Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+  Serial.println("Going to sleep as normal now.");
+  esp_deep_sleep_start();
+}
 
 void setup()
 { // comecando a comunicacao serial a um baud rate de 115200
@@ -58,19 +68,26 @@ void setup()
     attemptConnectMQTT();
   }
 }
-
+bool publicou;
+int counter;
 void loop()
-{
+{ 
   peso = peso + 1.32;
   String HX711Readings = "{\"peso\":\"" + String(peso) + "\", \"cerveja\":\"" + cerveja + "\"}";
   HX711Readings.toCharArray(data, (HX711Readings.length() + 1));
 
   // Publish values to MQTT topics
-  client.publish(topic, data); // Publish readings on topic (glasshouse/dhtreadings)
+  publicou = client.publish(topic, data,true); // Publish readings on topic (glasshouse/dhtreadings)
   
-  if (isMQTTConnected())
+  if (publicou)
   {
     Serial.println("Readings sent to MQTT.");
+    Serial.println(publicou);
+    counter = counter+1;
+    if(counter==3){
+      Slepping();
+    }
+    
   }
   else {
     Serial.println(isWiFiConnected());
@@ -87,5 +104,6 @@ void loop()
       }
     }  
   }
+ 
 delay(6000);
 }
