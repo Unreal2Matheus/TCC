@@ -11,8 +11,7 @@ import psycopg2 as pg2
 import paho.mqtt.client as mqtt
 import json
 
-db = pg2.connect( user="postgres",
-                     password="pir2quadrado", database="postgres")
+db = pg2.connect( user="postgres",password="pir2quadrado", database="postgres")
 cursor = db.cursor()
 
 broker_address = "farmer.cloudmqtt.com"  # Broker address
