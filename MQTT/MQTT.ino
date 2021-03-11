@@ -22,15 +22,15 @@ String cerveja = "APA";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-/* definitions for deepsleep */
-//#define uS_TO_S_FACTOR 1000000        /* Conversion factor for micro seconds to seconds */
-//#define TIME_TO_SLEEP 180              /* Time ESP32 will go to sleep for 5 minutes (in seconds) */
+// testa se o ESP32 esta conectado com o WIFI
 bool isWiFiConnected (){
   return WiFi.status() == WL_CONNECTED; 
 }
+// testa se o ESP32 esta conecatado com o servidor MQTT
 bool isMQTTConnected (){
   return client.connected();
 }
+// tenta se conectar com o servidor MQTT
 void attemptConnectMQTT(){
   Serial.println("Connecting to MQTT...");
 
@@ -47,6 +47,7 @@ void attemptConnectMQTT(){
     Serial.println(isWiFiConnected());
   }
 }
+// coloca o ESP32 num estado de baixo gasto de energia
 void Slepping(){
 
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR); //go to sleep
@@ -61,8 +62,7 @@ void setup()
 
   wi_fi_setup(ssid, password);
   client.setServer(mqttServer, mqttPort);
-
-
+  // tenta conectar com o mqtt caso o WIFI tambem esteja conectado 
   while (!isMQTTConnected() && isWiFiConnected())
   {
     attemptConnectMQTT();
@@ -73,23 +73,26 @@ int counter;
 void loop()
 { 
   peso = peso + 1.32;
+  // cria a  mensagem a ser publicada no formato json
   String HX711Readings = "{\"peso\":\"" + String(peso) + "\", \"cerveja\":\"" + cerveja + "\"}";
   HX711Readings.toCharArray(data, (HX711Readings.length() + 1));
 
-  // Publish values to MQTT topics
-  publicou = client.publish(topic, data,true); // Publish readings on topic (glasshouse/dhtreadings)
-  
+  // publica os valores para o topico MQTT
+  publicou = client.publish(topic, data,true);
+  // checa se pulicou e depois da quinta publicação bota o esp em modo sleep
   if (publicou)
   {
     Serial.println("Readings sent to MQTT.");
     Serial.println(publicou);
     counter = counter+1;
-    if(counter==3){
+    if(counter==5){
       Slepping();
     }
     
   }
+  // tenta a reconexão com o wifi e o servidor mqtt caso a publicação tenha falhado
   else {
+    counter = 0;
     Serial.println(isWiFiConnected());
     Serial.println(isMQTTConnected());
     if (!isWiFiConnected()){

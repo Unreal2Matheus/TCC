@@ -18,7 +18,7 @@ const int PD_SCK = 26; // pino do ESP32 que entra PD_SCK
 // parametro que entrara no app para calibracao da balanca
 const int peso_conhecid=0;
 const int scale_p = -21974.1452; // parametro usado na classe scale, consiguido apos calibracao
- 
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 HX711 scale;
